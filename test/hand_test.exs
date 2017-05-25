@@ -8,6 +8,16 @@ defmodule Blackjack.HandTest do
       {:diamond, 6},
     ]
 
-    assert Blackjack.Hand.to_value(hand) == 15
+    assert Blackjack.Hand.to_value(hand) == [15]
+  end
+
+  test "Can count aces correctly" do
+    hand = [
+      {:heart, :ace},
+      {:diamond, :ace},
+      {:club, :king}
+    ]
+
+    assert Blackjack.Hand.to_value(hand) == [12, 22, 32]
   end
 end

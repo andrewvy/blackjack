@@ -4,21 +4,26 @@ defmodule Blackjack.Hand do
 
   (This doesn't fully take into account aces!)
   """
+  @spec to_value(Blackjack.Types.hand) :: [non_neg_integer()]
   def to_value(hand) when is_list(hand) do
-    before_value =
-      Enum.reduce(hand, 0, fn({_suit, rank}, current_value) ->
-        current_value + rank_to_value(rank, false)
-      end)
+    {aces, non_aces} = Enum.partition(hand, fn({_suit, rank}) ->
+      rank == :ace
+    end)
 
-    if before_value > 21 do
-      Enum.reduce(hand, 0, fn({_suit, rank}, current_value) ->
-        current_value + rank_to_value(rank, true)
-      end)
-    else
-      before_value
-    end
+    # Getting the count before we consider aces.
+    count_before_aces = Enum.reduce(non_aces, 0, fn({_suit, rank}, acc) ->
+      acc + rank_to_value(rank, false)
+    end)
+
+    count_with_aces_as_ones = count_before_aces + Enum.count(aces)
+
+    Enum.reduce(aces, [count_with_aces_as_ones], fn(_, [previous_value | _] = acc) ->
+      [previous_value + 10 | acc]
+    end)
+    |> Enum.sort()
   end
 
+  @spec rank_to_value(Blackjack.Types.rank, boolean()) :: non_neg_integer()
   def rank_to_value(number, _is_bust) when is_integer(number) do
     number
   end
